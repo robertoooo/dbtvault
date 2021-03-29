@@ -437,7 +437,6 @@ class DBTTestUtils:
         """
 
         if getattr(context, 'disable_payload', False):
-
             metadata = {k: v for k, v in metadata.items() if k != "src_payload"}
 
         return metadata
@@ -748,6 +747,7 @@ class DBTVAULTGenerator:
                     satellite_columns_ldts = [f"{col}_{list(item[col]['ldts'].keys())[0]}" for col in item.keys()]
 
                     processed_headings.extend(satellite_columns_hk + satellite_columns_ldts)
+
 
                 elif item.get("source_column", None) and item.get("alias", None):
 
