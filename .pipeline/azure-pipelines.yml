@@ -8,13 +8,13 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  SNOWFLAKE_DB_ACCOUNT: "$(SNOWFLAKE_DB_ACCOUNT)"
-  SNOWFLAKE_DB_USER: "$(SNOWFLAKE_DB_USER)"
-  SNOWFLAKE_DB_PW: "$(SNOWFLAKE_DB_PW)"
-  SNOWFLAKE_DB_ROLE: "$(SNOWFLAKE_DB_ROLE)"
-  SNOWFLAKE_DB_DATABASE: "$(SNOWFLAKE_DB_DATABASE)"
-  SNOWFLAKE_DB_WH: "$(SNOWFLAKE_DB_WH)"
-  SNOWFLAKE_DB_SCHEMA: "$(SNOWFLAKE_DB_SCHEMA)"
+  SNOWFLAKE_DB_ACCOUNT: "$(snowflake_db_account)"
+  SNOWFLAKE_DB_USER: "$(snowflake_db_user)"
+  SNOWFLAKE_DB_PW: "$(snowflake_db_pw)"
+  SNOWFLAKE_DB_ROLE: "$(snowflake_db_role)"
+  SNOWFLAKE_DB_DATABASE: "$(snowflake_db_database)"
+  SNOWFLAKE_DB_WH: "$(snowflake_db_wh)"
+  SNOWFLAKE_DB_SCHEMA: "$(snowflake_db_schema)"
 
 stages:
   - stage: 'Build_environment'
@@ -29,9 +29,9 @@ stages:
             displayName: 'Install pipenv'
           - script: pipenv install --dev
             displayName: 'Install Pipenv dependencies'
-          - script: inv run-harness-tests
+          - script: pipenv run inv run-harness-tests
             displayName: 'Harness Tests'
-          - script: inv run-macro-tests -p snowflake
+          - script: pipenv run inv run-macro-tests -p snowflake
             displayName: 'Macro Tests - Snowflake'
 
       - job: 'UnitTests'
