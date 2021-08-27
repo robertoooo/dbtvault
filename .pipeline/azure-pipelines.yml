@@ -41,7 +41,10 @@ stages:
                 && rm op.zip
             displayName: "Install 1Password"
           - script: curl https://opconnect.data-vault.com:443/health
-
+          - script: op read op://dbtvault/snowflake/database
+            env:
+              OP_CONNECT_TOKEN: "$(token)"
+              OP_CONNECT_HOST: "$(url)"
 
 #version: 2.1
 
