@@ -13,7 +13,7 @@ logger.setLevel(logging.INFO)
 
 
 @task()
-def setup(c, platform=None, project=None, disable_op=False):
+def setup(c, platform=None, project=None, disable_op=False, is_pipeline=False):
     """
     Convenience task which runs all setup tasks in the correct sequence
         :param c: invoke context
@@ -21,7 +21,9 @@ def setup(c, platform=None, project=None, disable_op=False):
         (Optional if defaults already set)
         :param disable_op: Disable 1Password
         :param project: dbt project to run with (Optional if defaults already set)
+        :param is_pipeline:
     """
+
     if platform:
         c.platform = platform
     if project:
@@ -33,6 +35,11 @@ def setup(c, platform=None, project=None, disable_op=False):
 
     if disable_op:
         logger.info('Checking dbt connection... (running dbt debug)')
+
+        if is_pipeline:
+            inject_for_platform(c, platform, make_db=False)
+            os.environ['DBT_PROFILES_DIR'] = str(test.PROFILE_DIR)
+
         run_dbt(c, 'debug', platform=platform, project='test', disable_op=disable_op)
     else:
         logger.info(f'Injecting credentials to files...')
@@ -72,7 +79,7 @@ def set_defaults(c, platform=None, project='test'):
 @task
 def inject_to_file(c, from_file, to_file):
     """
-    Injects secrets into plain text from secrethub. BE CAREFUL! By default this is stored in
+    Injects secrets into plain text from 1Password. BE CAREFUL! By default this is stored in
     profiles/profiles.yml, which is an ignored file in git.
         :param c: invoke context
         :param from_file: File which includes 1Password paths to extract into plain text
@@ -90,7 +97,7 @@ def inject_to_file(c, from_file, to_file):
 
 
 @task
-def inject_for_platform(c, platform):
+def inject_for_platform(c, platform, make_profiles=True, make_db=True):
     if platform == 'snowflake':
         profiles_from_file = 'env/snowflake/profiles_snowflake.tpl.yml'
         db_from_file = 'env/snowflake/db_snowflake.tpl.env'
@@ -106,8 +113,10 @@ def inject_for_platform(c, platform):
     else:
         raise ValueError(f"Platform must be one of: {', '.join(test.AVAILABLE_PLATFORMS)}")
 
-    inject_to_file(c, from_file=profiles_from_file, to_file='env/profiles.yml')
-    inject_to_file(c, from_file=db_from_file, to_file='env/db.env')
+    if make_profiles:
+        inject_to_file(c, from_file=profiles_from_file, to_file='env/profiles.yml')
+    if make_db:
+        inject_to_file(c, from_file=db_from_file, to_file='env/db.env')
 
 
 @task
@@ -220,10 +229,9 @@ def run_macro_tests(c, platform=None, disable_op=False):
 
     platform = c.platform if not platform else platform
 
-    # Select dbt profile
     if check_platform(c, platform):
         os.environ['PLATFORM'] = platform
-        logger.info(f"Running macro tests tests for '{platform}'.")
+        logger.info(f"Running macro tests for '{platform}'.")
 
     pytest_command = f"pytest {str(test.TEST_MACRO_ROOT.absolute())} -n 4 -vv"
 
@@ -243,14 +251,14 @@ def run_harness_tests(c, platform=None, disable_op=False):
         :param c: invoke context
         :param platform: dbt profile platform/target
         :param disable_op: Disable 1Password
+        :param is_pipeline: Enable extra provisioning for pipeline
     """
 
     platform = c.platform if not platform else platform
 
-    # Select dbt profile
     if check_platform(c, platform):
         os.environ['PLATFORM'] = platform
-        logger.info(f"Running harness tests tests for '{platform}'.")
+        logger.info(f"Running harness tests for '{platform}'.")
 
     pytest_command = f"pytest {str(test.TEST_HARNESS_TESTS_ROOT.absolute())} -n 4 -vv"
 
