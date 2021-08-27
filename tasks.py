@@ -13,7 +13,7 @@ logger.setLevel(logging.INFO)
 
 
 @task()
-def setup(c, platform=None, project=None, disable_op=False, is_pipeline=False):
+def setup(c, platform=None, project=None, disable_op=False):
     """
     Convenience task which runs all setup tasks in the correct sequence
         :param c: invoke context
@@ -21,9 +21,7 @@ def setup(c, platform=None, project=None, disable_op=False, is_pipeline=False):
         (Optional if defaults already set)
         :param disable_op: Disable 1Password
         :param project: dbt project to run with (Optional if defaults already set)
-        :param is_pipeline:
     """
-
     if platform:
         c.platform = platform
     if project:
@@ -35,11 +33,6 @@ def setup(c, platform=None, project=None, disable_op=False, is_pipeline=False):
 
     if disable_op:
         logger.info('Checking dbt connection... (running dbt debug)')
-
-        if is_pipeline:
-            inject_for_platform(c, platform, make_db=False)
-            os.environ['DBT_PROFILES_DIR'] = str(test.PROFILE_DIR)
-
         run_dbt(c, 'debug', platform=platform, project='test', disable_op=disable_op)
     else:
         logger.info(f'Injecting credentials to files...')
@@ -97,7 +90,7 @@ def inject_to_file(c, from_file, to_file):
 
 
 @task
-def inject_for_platform(c, platform, make_profiles=True, make_db=True):
+def inject_for_platform(c, platform):
     if platform == 'snowflake':
         profiles_from_file = 'env/snowflake/profiles_snowflake.tpl.yml'
         db_from_file = 'env/snowflake/db_snowflake.tpl.env'
@@ -113,10 +106,8 @@ def inject_for_platform(c, platform, make_profiles=True, make_db=True):
     else:
         raise ValueError(f"Platform must be one of: {', '.join(test.AVAILABLE_PLATFORMS)}")
 
-    if make_profiles:
-        inject_to_file(c, from_file=profiles_from_file, to_file='env/profiles.yml')
-    if make_db:
-        inject_to_file(c, from_file=db_from_file, to_file='env/db.env')
+    inject_to_file(c, from_file=profiles_from_file, to_file='env/profiles.yml')
+    inject_to_file(c, from_file=db_from_file, to_file='env/db.env')
 
 
 @task

@@ -32,7 +32,7 @@ stages:
           displayName: 'Install pipenv'
         - script: pipenv install --dev
           displayName: 'Install Pipenv dependencies'
-        - script: python -m pipenv run inv setup -p snowflake -d -i
+        - script: python -m pipenv run inv setup -p snowflake -d
           displayName: 'Setup'
           env:
             SNOWFLAKE_DB_ACCOUNT: "$(snowflake_db_account)"
