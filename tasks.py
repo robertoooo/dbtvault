@@ -251,7 +251,6 @@ def run_harness_tests(c, platform=None, disable_op=False):
         :param c: invoke context
         :param platform: dbt profile platform/target
         :param disable_op: Disable 1Password
-        :param is_pipeline: Enable extra provisioning for pipeline
     """
 
     platform = c.platform if not platform else platform
