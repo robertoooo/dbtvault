@@ -8,38 +8,57 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  SNOWFLAKE_DB_ACCOUNT: "$(snowflake_db_account)"
-  SNOWFLAKE_DB_USER: "$(snowflake_db_user)"
-  SNOWFLAKE_DB_PW: "$(snowflake_db_pw)"
-  SNOWFLAKE_DB_ROLE: "$(snowflake_db_role)"
-  SNOWFLAKE_DB_DATABASE: "$(snowflake_db_database)"
-  SNOWFLAKE_DB_WH: "$(snowflake_db_wh)"
-  SNOWFLAKE_DB_SCHEMA: "$(snowflake_db_schema)"
+  PIPENV_CACHE_DIR: $(Pipeline.Workspace)/.pipenv
 
 stages:
   - stage: 'Build_environment'
+    displayName: 'Build Environment'
     jobs:
       - job: 'InstallDependencies'
-
+        displayName: 'Install Dependencies'
         steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '3.9'
-          - script: pip install pipenv
-            displayName: 'Install pipenv'
-          - script: pipenv install --dev
-            displayName: 'Install Pipenv dependencies'
-          - script: pipenv run inv run-harness-tests
-            displayName: 'Harness Tests'
-          - script: pipenv run inv run-macro-tests -p snowflake
-            displayName: 'Macro Tests - Snowflake'
-
-      - job: 'UnitTests'
-
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '3.9'
-            displayName: 'Harness Tests'
-          - script: inv run-macro-tests -p snowflake
-            displayName: 'Macro Tests - Snowflake'
+        - task: Cache@2
+          inputs:
+            key: 'python | "$(Agent.OS)" | Pipfile.lock'
+            restoreKeys: |
+              python | "$(Agent.OS)"
+              python
+            path: $(PIPENV_CACHE_DIR)
+          displayName: Cache pipenv packages
+        - task: UsePythonVersion@0
+          inputs:
+            versionSpec: '3.9'
+        - script: pip install pipenv
+          displayName: 'Install pipenv'
+        - script: pipenv install --dev
+          displayName: 'Install Pipenv dependencies'
+        - script: python -m pipenv run inv setup -p snowflake -d
+          displayName: 'Harness Tests'
+          env:
+            SNOWFLAKE_DB_ACCOUNT: "$(snowflake_db_account)"
+            SNOWFLAKE_DB_USER: "$(snowflake_db_user)"
+            SNOWFLAKE_DB_PW: "$(snowflake_db_pw)"
+            SNOWFLAKE_DB_ROLE: "$(snowflake_db_role)"
+            SNOWFLAKE_DB_DATABASE: "$(snowflake_db_database)"
+            SNOWFLAKE_DB_WH: "$(snowflake_db_wh)"
+            SNOWFLAKE_DB_SCHEMA: "$(snowflake_db_schema)"
+        - script: python -m pipenv run inv run-harness-tests -d
+          displayName: 'Harness Tests'
+          env:
+            SNOWFLAKE_DB_ACCOUNT: "$(snowflake_db_account)"
+            SNOWFLAKE_DB_USER: "$(snowflake_db_user)"
+            SNOWFLAKE_DB_PW: "$(snowflake_db_pw)"
+            SNOWFLAKE_DB_ROLE: "$(snowflake_db_role)"
+            SNOWFLAKE_DB_DATABASE: "$(snowflake_db_database)"
+            SNOWFLAKE_DB_WH: "$(snowflake_db_wh)"
+            SNOWFLAKE_DB_SCHEMA: "$(snowflake_db_schema)"
+        - script: python -m pipenv run inv run-macro-tests -p snowflake -d
+          displayName: 'Macro Tests - Snowflake'
+          env:
+            SNOWFLAKE_DB_ACCOUNT: "$(snowflake_db_account)"
+            SNOWFLAKE_DB_USER: "$(snowflake_db_user)"
+            SNOWFLAKE_DB_PW: "$(snowflake_db_pw)"
+            SNOWFLAKE_DB_ROLE: "$(snowflake_db_role)"
+            SNOWFLAKE_DB_DATABASE: "$(snowflake_db_database)"
+            SNOWFLAKE_DB_WH: "$(snowflake_db_wh)"
+            SNOWFLAKE_DB_SCHEMA: "$(snowflake_db_schema)"
