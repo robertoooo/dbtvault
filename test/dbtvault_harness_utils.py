@@ -403,7 +403,7 @@ def run_dbt_models(*, mode='compile', model_names: list, args=None, full_refresh
         command.append('--full-refresh')
 
     if args:
-        command.extend([f"--vars '{json.dumps(args)}'"])
+        command.extend([f"--vars '{args}'"])
 
     return run_dbt_command(command)
 
@@ -419,7 +419,7 @@ def run_dbt_operation(macro_name: str, args=None) -> str:
 
     if args:
         args = str(args).replace('\'', '')
-        command.extend([f"--args '{json.dumps(args)}'"])
+        command.extend([f"--args '{args}'"])
 
     return run_dbt_command(command)
 
