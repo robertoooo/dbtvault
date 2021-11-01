@@ -24,7 +24,7 @@ Feature: [SQLS-CYC] Full Vault Cycles
       | 10035      | 1002        | 2019-05-03   | 80.00  | 2019-09-16     | NLD         | 17-214-200-1214 | DUTCH       | 2019-05-04 | *      |
       | 10070      | 1040        | 2019-05-03   | 90.00  | 2019-09-15     | ZIM         | 17-214-200-4040 | CHINESE     | 2019-05-04 | *      |
     And I stage the STG_BOOKING data
-    And I load the vault
+    When I load the vault
 
     # ================ DAY 2 ===================
     And the RAW_STAGE_CUSTOMER is loaded
@@ -38,7 +38,7 @@ Feature: [SQLS-CYC] Full Vault Cycles
       | 10036      | 1003        | 2019-05-04   | 70.00  | 2019-09-13     | AUS         | 17-214-555-1214 | AUSTRALIAN  | 2019-05-05 | *      |
       | 10037      | 1004        | 2019-05-04   | 810.00 | 2019-09-18     | DEU         | 17-214-123-1214 | GERMAN      | 2019-05-05 | *      |
     And I stage the STG_BOOKING data
-    And I load the vault
+    When I load the vault
 
     # ================ DAY 3 ===================
     And the RAW_STAGE_CUSTOMER is loaded
@@ -53,7 +53,7 @@ Feature: [SQLS-CYC] Full Vault Cycles
       | 10038      | 1005        | 2019-05-05   | 216.50 | 2019-09-19     | ITA         | 17-214-456-1214 | BRITISH     | 2019-05-06 | *      |
       | 10039      | 1006        | 2019-05-05   | 111.10 | 2019-09-20     | NOR         | 17-214-789-1214 | RUSSIAN     | 2019-05-06 | *      |
     And I stage the STG_BOOKING data
-    And I load the vault
+    When I load the vault
 
     # ================ DAY 4 ===================
     And the RAW_STAGE_CUSTOMER is loaded
@@ -83,7 +83,7 @@ Feature: [SQLS-CYC] Full Vault Cycles
       | 10047      | 1014        | 2019-05-06   | 259.99 | 2019-12-22     | HMD         | 17-214-577-1222 | ANGOLAN     | 2019-05-07 | *      |
       | 10048      | 1015        | 2019-05-06   | 219.99 | 2019-10-16     | JAM         | 17-214-577-1223 | TAIWANESE   | 2019-05-07 | *      |
     And I stage the STG_BOOKING data
-    And I load the vault
+    When I load the vault
 
     # =============== CHECKS ===================
     Then the HUB_CUSTOMER table should contain expected data
